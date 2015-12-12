@@ -44,7 +44,7 @@ class metadata
 			$artwork=false;
 		elseif(!file_exists($artwork=sprintf('%s/%s - %s.%s',$outpath,$trackinfo['albumartist'],$trackinfo['album'],pathinfo($trackinfo['cover'],PATHINFO_EXTENSION))))
 			copy($trackinfo['cover'],$artwork);
-	var_dump($artwork);
+
 		$outfile=sprintf('%s/%s.%s',$outpath,$filename,$extension);
 		if(file_exists($outfile))
 		{
