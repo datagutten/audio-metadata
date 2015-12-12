@@ -13,7 +13,7 @@ class metadata
 	function filnavn($tittel)
 	{
 		$filnavn=html_entity_decode($tittel);
-		$filnavn=str_replace(array(':','?','*','|','<','>','/','\\'),array('-','','','','','','',''),$filnavn); //Fjern tegn som ikke kan brukes i filnavn på windows
+		$filnavn=str_replace(array(': ',':','?','*','|','<','>','/','\\'),array(' - ','-','','','','','','',''),$filnavn); //Fjern tegn som ikke kan brukes i filnavn på windows
 		if(PHP_OS=='WINNT')
 			$filnavn=utf8_decode($filnavn);
 		return $filnavn;
@@ -42,13 +42,18 @@ class metadata
 
 		$extension=pathinfo($infile,PATHINFO_EXTENSION);
 		
-		$outpath=sprintf('%s/%s - %s',$outpath,$trackinfo['albumartist'],$trackinfo['album']);
+		if(!empty($trackinfo['albumartist']))
+			$albumname=$this->filnavn(sprintf('%s - %s',$trackinfo['albumartist'],$trackinfo['album']));
+		else
+			$albumname=$this->filnavn($trackinfo['album']); //No album artist
+		$outpath.='/'.$albumname;
+
 		if(!file_exists($outpath))
 			mkdir($outpath,0777,true);
 
 		if(empty($trackinfo['cover']))
 			$artwork=false;
-		elseif(!file_exists($artwork=sprintf('%s/%s - %s.%s',$outpath,$trackinfo['albumartist'],$trackinfo['album'],pathinfo($trackinfo['cover'],PATHINFO_EXTENSION))))
+		elseif(!file_exists($artwork=$outpath.'/'.$albumname.'.'.pathinfo($trackinfo['cover'],PATHINFO_EXTENSION)))
 			copy($trackinfo['cover'],$artwork);
 
 		$outfile=sprintf('%s/%s.%s',$outpath,$filename,$extension);
