@@ -33,6 +33,11 @@ class metadata
 
 	function metadata($infile,$outpath,$trackinfo)
 	{
+		if(!file_exists($infile) || !is_file($infile))
+		{
+			$this->error="$infile does not exist or is not a file";
+			return false;
+		}
 		$filename=$this->buildfilename($trackinfo);
 
 		$extension=pathinfo($infile,PATHINFO_EXTENSION);
@@ -49,7 +54,6 @@ class metadata
 		$outfile=sprintf('%s/%s.%s',$outpath,$filename,$extension);
 		if(file_exists($outfile))
 		{
-			unlink($infile);
 			$this->error="$outfile exists";
 			return false;
 		}
@@ -63,22 +67,12 @@ class metadata
 			return false;
 		}
 	}
-	function metaflac($infile,$outfile,$trackinfo,$artwork=false)
+	private function metaflac($infile,$outfile,$trackinfo,$artwork=false)
 	{
 		if($this->dependcheck->depend('metaflac')!==true)
 		{
 			$this->error="Metaflac not found, unable to write flac metadata";
 			return false;
-		}
-		if(!is_file($infile))
-		{
-			$this->error="$infile is not a file\n";
-			return false;	
-		}
-		if(file_exists($outfile))
-		{
-			$this->error="$outfile exists";
-			return false;	
 		}
 		copy($infile,$outfile);
 		$options=array('artist'=>		'--set-tag="ARTIST=%s"',
@@ -117,11 +111,8 @@ class metadata
 			shell_exec($cmd="metaflac --import-picture-from=\"$artwork\" \"$outfile\"");
 	}
 
-	function atomicparsley($infile,$outfile,$trackinfo,$artwork=false)
+	private function atomicparsley($infile,$outfile,$trackinfo,$artwork=false)
 	{
-		if(file_exists($outfile))
-			return false;
-
 		if($this->dependcheck->depend('AtomicParsley')!==true)
 		{
 			$this->error="AtomicParsley is not installed, unable to tag m4a files";
