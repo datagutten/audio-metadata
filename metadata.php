@@ -75,7 +75,7 @@ class metadata
 			return false;
 		}
 		copy($infile,$outfile);
-		$options=array('artist'=>		'--set-tag="ARTIST=%s"',
+		$options=array( 'artist'=>		'--set-tag="ARTIST=%s"',
 						'title'=>		'--set-tag="TITLE=%s"',
 						'album'=>		'--set-tag="ALBUM=%s"',
 						'tracknumber'=>	'--set-tag="TRACKNUMBER=%s"',
@@ -92,7 +92,7 @@ class metadata
 		}
 		shell_exec($cmd="metaflac --remove-all \"$outfile\""); //Remove any existing metadata
 		$cmd='metaflac';
-		foreach($options as $option_key=>$option_value)
+		foreach($options as $option_key=>$option_value) //Check which options we have data for and them to the command
 		{
 			if(!isset($trackinfo[$option_key]))
 			{
@@ -102,11 +102,10 @@ class metadata
 			}
 			$cmd.=sprintf(' '.$option_value,$trackinfo[$option_key]);
 		}
-		$cmd=sprintf('%s "%s"',$cmd,$outfile);
+		$cmd.='"'.$outfile.'"'; //Add the filename to the command
 
-		shell_exec($cmd.' 2>metaflac_error.txt');
-		if(!file_exists($outfile))
-			return false;
+		shell_exec($cmd.' 2>&1');
+
 		if($artwork!==false && file_exists($artwork)) //Write artwork
 			shell_exec($cmd="metaflac --import-picture-from=\"$artwork\" \"$outfile\"");
 	}
@@ -145,16 +144,10 @@ class metadata
 			$cmd.=sprintf(' '.$option_value,$trackinfo[$option_key]);
 		}
 
-
-		//$title=str_replace('"','\\"',$title);
-
-
-	
 		if($artwork!==false && file_exists($artwork))
 			$cmd.=" --artwork \"$artwork\"";
-	
-		$cmd.=" 2>&1";
-		$cmdreturn=shell_exec($cmd);
+
+		$cmdreturn=shell_exec($cmd." 2>&1");
 		/*if($this->br!=="\n")
 		{
 			$cmdreturn=nl2br($cmdreturn); //Lag riktige linjeskift
