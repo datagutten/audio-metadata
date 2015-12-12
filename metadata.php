@@ -26,7 +26,8 @@ class metadata
 			$trackname=$trackinfo['title'];
 		if(!empty($trackinfo['track']))
 			$trackname=sprintf("%02d %s",$trackinfo['track'],$trackname);
-
+		if(!empty($trackinfo['totalvolumes']) && $trackinfo['totalvolumes']>1) //Multi volume album
+			$trackname=sprintf("%02d %s",$trackinfo['volumenumber'],$trackname);
 		return $this->filnavn($trackname);
 	}
 
