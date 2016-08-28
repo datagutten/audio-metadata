@@ -72,7 +72,7 @@ class metadata
 			return false;
 		}
 	}
-	private function metaflac($infile,$outfile,$trackinfo,$artwork=false)
+	public function metaflac($infile,$outfile,$trackinfo,$artwork=false)
 	{
 		if($this->dependcheck->depend('metaflac')!==true)
 		{
@@ -115,7 +115,7 @@ class metadata
 			shell_exec($cmd="metaflac --import-picture-from=\"$artwork\" \"$outfile\"");
 	}
 
-	private function atomicparsley($infile,$outfile,$trackinfo,$artwork=false)
+	public function atomicparsley($infile,$outfile,$trackinfo,$artwork=false)
 	{
 		if($this->dependcheck->depend('AtomicParsley')!==true)
 		{
