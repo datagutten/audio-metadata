@@ -123,6 +123,7 @@ class metadata
 			return false;
 		}
 		$cmd=sprintf('AtomicParsley "%s" --output "%s"',$infile,$outfile);
+
 		if(isset($trackinfo['compilation']))
 		{
 			if($trackinfo['compilation']===true)
@@ -133,7 +134,7 @@ class metadata
 		$options=array('artist'=>		'--artist="%s"',
 						'title'=>		'--title="%s"',
 						'album'=>		'--album="%s"',
-						'tracknumber'=>	'--tracknumber=%d',
+						'tracknumber'=>	'--tracknum=%d',
 						'compilation'=>	'--compilation="%s"');
 		if(isset($trackinfo['tracknumber']) && isset($trackinfo['totaltracks']))
 			$options['tracknumber']=sprintf('--tracknum=%d/%d',$trackinfo['tracknumber'],$trackinfo['totaltracks']);
@@ -152,14 +153,13 @@ class metadata
 		if($artwork!==false && file_exists($artwork))
 			$cmd.=" --artwork \"$artwork\"";
 
-		$cmdreturn=shell_exec($cmd." 2>&1");
-		/*if($this->br!=="\n")
+		exec($cmd." 2>&1",$output,$return);
+		if($return!=0)
 		{
-			$cmdreturn=nl2br($cmdreturn); //Lag riktige linjeskift
-			if(PHP_OS=='WINNT')
-				$cmd=utf8_encode($cmd); //Konverter kommandolinjen tilbake til utf8 for riktig visning i nettleser
+			$this->error=implode("\n",$output);
+			return false;
 		}
-		return $cmd.$this->br.$cmdreturn;*/
+		return implode("\n",$output);
 	}
 }
 	?>
