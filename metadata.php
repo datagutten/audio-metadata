@@ -107,12 +107,19 @@ class metadata
 			}
 			$cmd.=sprintf(' '.$option_value,$trackinfo[$option_key]);
 		}
-		$cmd.='"'.$outfile.'"'; //Add the filename to the command
+		$cmd.=' "'.$outfile.'"'; //Add the filename to the command
 
-		shell_exec($cmd.' 2>&1');
+		exec($cmd." 2>&1",$output,$return);
+
+		if($return!=0)
+		{
+			$this->error=implode("\n",$output);
+			return false;
+		}
 
 		if($artwork!==false && file_exists($artwork)) //Write artwork
 			shell_exec($cmd="metaflac --import-picture-from=\"$artwork\" \"$outfile\"");
+		return implode("\n",$output);
 	}
 
 	public function atomicparsley($infile,$outfile,$trackinfo,$artwork=false)
