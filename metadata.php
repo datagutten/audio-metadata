@@ -8,15 +8,13 @@ class metadata
 	function __construct()
 	{
 		require_once 'tools/dependcheck.php';
+		require_once 'tools/filnavn.php';
 		$this->dependcheck=new dependcheck;
 	}
 	function filnavn($tittel)
 	{
-		$filnavn=html_entity_decode($tittel);
-		$filnavn=str_replace(array(': ',':','?','*','|','<','>','/','\\'),array(' - ','-','','','','','','',''),$filnavn); //Fjern tegn som ikke kan brukes i filnavn på windows
-		if(PHP_OS=='WINNT')
-			$filnavn=utf8_decode($filnavn);
-		return $filnavn;
+		//Call global function from tools submodule
+		return filnavn($tittel);
 	}
 	function buildfilename($trackinfo)
 	{
