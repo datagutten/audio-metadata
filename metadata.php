@@ -44,6 +44,9 @@ class metadata
 			$albumname=$this->filnavn(sprintf('%s - %s',$trackinfo['albumartist'],$trackinfo['album']));
 		else
 			$albumname=$this->filnavn($trackinfo['album']); //No album artist
+		if(!empty($trackinfo['year']))
+			$albumname=sprintf('%s (%d)',$albumname,$trackinfo['year']);
+		$albumname.=' '.strtoupper($extension);
 		$outpath.='/'.$albumname;
 
 		if(!file_exists($outpath))
@@ -83,7 +86,10 @@ class metadata
 						'album'=>		'--set-tag="ALBUM=%s"',
 						'tracknumber'=>	'--set-tag="TRACKNUMBER=%s"',
 						'totaltracks'=>	'--set-tag="TRACKTOTAL=%s"',
-						'compilation'=>	'--set-tag="COMPILATION=%s"');
+						'compilation'=>	'--set-tag="COMPILATION=%s"',
+						'isrc'=>		'--set-tag="ISRC=%s"',
+						'year'=>		'--set-tag="YEAR=%s"',
+						'copyright'=>	'--set-tag="COPYRIGHT=%s"');
 		if(isset($trackinfo['compilation']))
 		{
 			if($trackinfo['compilation']===true)
