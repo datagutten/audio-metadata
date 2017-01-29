@@ -80,6 +80,9 @@ class metadata
 			$this->error="Metaflac not found, unable to write flac metadata";
 			return false;
 		}
+		if(substr($infile,-4,4)!='flac')
+			throw new Exception('File must have flac extension');
+
 		copy($infile,$outfile);
 		$options=array( 'artist'=>		'--set-tag="ARTIST=%s"',
 						'title'=>		'--set-tag="TITLE=%s"',
