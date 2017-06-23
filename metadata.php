@@ -84,15 +84,16 @@ class metadata
 			throw new Exception('File must have flac extension');
 
 		copy($infile,$outfile);
-		$options=array( 'artist'=>		'--set-tag="ARTIST=%s"',
-						'title'=>		'--set-tag="TITLE=%s"',
-						'album'=>		'--set-tag="ALBUM=%s"',
-						'tracknumber'=>	'--set-tag="TRACKNUMBER=%s"',
-						'totaltracks'=>	'--set-tag="TRACKTOTAL=%s"',
-						'compilation'=>	'--set-tag="COMPILATION=%s"',
-						'isrc'=>		'--set-tag="ISRC=%s"',
-						'year'=>		'--set-tag="YEAR=%s"',
-						'copyright'=>	'--set-tag="COPYRIGHT=%s"');
+		$options=array(
+				'artist'=>		'ARTIST',
+				'title'=>		'TITLE',
+				'album'=>		'ALBUM',
+				'tracknumber'=>	'TRACKNUMBER',
+				'totaltracks'=>	'TRACKTOTAL',
+				'compilation'=>	'COMPILATION',
+				'isrc'=>		'ISRC',
+				'year'=>		'YEAR',
+				'copyright'=>	'COPYRIGHT');
 		if(isset($trackinfo['compilation']))
 		{
 			if($trackinfo['compilation']===true)
@@ -102,20 +103,19 @@ class metadata
 			else
 				unset($trackinfo['compilation']);
 		}
-		shell_exec($cmd="metaflac --remove-all \"$outfile\""); //Remove any existing metadata
+		shell_exec($cmd=sprintf('metaflac --remove-all %s',escapeshellarg($outfile))); //Remove any existing metadata
 		$cmd='metaflac';
-		foreach($options as $option_key=>$option_value) //Check which options we have data for and them to the command
+		foreach($options as $field_name=>$command_key) //Check which options we have data for and them to the command
 		{
-			if(!isset($trackinfo[$option_key]))
+			if(!isset($trackinfo[$field_name]))
 			{
 				if($this->debug)
-					echo "No value for $option_key\n";
+					echo "No value for $field_name\n";
 				continue;
 			}
-			$cmd.=sprintf(' '.$option_value,$trackinfo[$option_key]);
+			$cmd.=sprintf(' --set-tag=%s',escapeshellarg($command_key.'='.$trackinfo[$field_name]));
 		}
-		$cmd.=' "'.$outfile.'"'; //Add the filename to the command
-
+		$cmd.=' '.escapeshellarg($outfile); //Add the filename to the command
 		exec($cmd." 2>&1",$output,$return);
 
 		if($return!=0)
@@ -125,7 +125,7 @@ class metadata
 		}
 
 		if($artwork!==false && file_exists($artwork)) //Write artwork
-			shell_exec($cmd="metaflac --import-picture-from=\"$artwork\" \"$outfile\"");
+			shell_exec($cmd=sprintf("metaflac --import-picture-from=%s %s",escapeshellarg($artwork),escapeshellarg($outfile)));
 		return implode("\n",$output);
 	}
 
@@ -165,7 +165,7 @@ class metadata
 		}
 
 		if($artwork!==false && file_exists($artwork))
-			$cmd.=" --artwork \"$artwork\"";
+			$cmd.=" --artwork ".escapeshellarg($artwork);
 
 		exec($cmd." 2>&1",$output,$return);
 		if($return!=0)
@@ -190,16 +190,17 @@ class metadata
 		if(!file_exists($file))
 			return false;
 		$pathinfo=pathinfo($file);
-		$tmpfile='/tmp/'.$pathinfo['basename'].'wav';
+		$tmpfile='/tmp/'.$pathinfo['basename'].'.wav';
 		$flac_file=sprintf('%s/%s.flac',$pathinfo['dirname'],$pathinfo['filename']);
-		shell_exec(sprintf('ffmpeg -n -i "%s" -f wav "%s" 2>&1',$file,$tmpfile)); //Convert to temporary wav file
+
+		shell_exec($cmd=sprintf('ffmpeg -n -i %s -f wav %s 2>&1',escapeshellarg($file),escapeshellarg($tmpfile))); //Convert to temporary wav file
 		//shell_exec(sprintf('ffmpeg -n -i "%s" -f wav "%s"',$file,$tmpfile)); //Convert to temporary wav file
 		if(!file_exists($tmpfile))
 		{
 			$this->error='Error converting to temporary wav file';
 			return false;
 		}
-		shell_exec(sprintf('flac -s -o "%s/%s.flac" "%s"',$pathinfo['dirname'],$pathinfo['filename'],$tmpfile)); //Convert wav to flac
+		shell_exec(sprintf('flac -s -o %s %s',escapeshellarg($flac_file),escapeshellarg($tmpfile))); //Convert wav to flac
 
 		if(!file_exists($flac_file))
 		{
