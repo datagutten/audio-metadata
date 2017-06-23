@@ -175,5 +175,38 @@ class metadata
 		}
 		return implode("\n",$output);
 	}
+	/*
+	Convert a file to flac
+	The file is converted via wav, so all metadata are removed
+	The flac file is saved in the same directory as the source file
+	*/
+	function convert_to_flac($file)
+	{
+		if(($missing=$this->dependcheck->depend(array('flac','ffmpeg')))!==true)
+		{
+			$this->error='Missing required tools to convert files: '.implode("\n",$missing);
+			return false;
+		}
+		if(!file_exists($file))
+			return false;
+		$pathinfo=pathinfo($file);
+		$tmpfile='/tmp/'.$pathinfo['basename'].'wav';
+		$flac_file=sprintf('%s/%s.flac',$pathinfo['dirname'],$pathinfo['filename']);
+		shell_exec(sprintf('ffmpeg -n -i "%s" -f wav "%s" 2>&1',$file,$tmpfile)); //Convert to temporary wav file
+		//shell_exec(sprintf('ffmpeg -n -i "%s" -f wav "%s"',$file,$tmpfile)); //Convert to temporary wav file
+		if(!file_exists($tmpfile))
+		{
+			$this->error='Error converting to temporary wav file';
+			return false;
+		}
+		shell_exec(sprintf('flac -s -o "%s/%s.flac" "%s"',$pathinfo['dirname'],$pathinfo['filename'],$tmpfile)); //Convert wav to flac
+
+		if(!file_exists($flac_file))
+		{
+			$this->error='Error converting to flac';
+			return false;
+		}
+		unlink($tmpfile); //Remove temporary wav file
+		return $flac_file;
+	}
 }
-	?>
