@@ -44,8 +44,12 @@ class metadata
 			$albumname=$this->filnavn(sprintf('%s - %s',$trackinfo['albumartist'],$trackinfo['album']));
 		else
 			$albumname=$this->filnavn($trackinfo['album']); //No album artist
-		if(!empty($trackinfo['year']))
+
+		if(!empty($trackinfo['albumyear']))
+			$albumname=sprintf('%s (%d)',$albumname,$trackinfo['albumyear']);
+		elseif(!empty($trackinfo['year']))
 			$albumname=sprintf('%s (%d)',$albumname,$trackinfo['year']);
+
 		$albumname.=' '.strtoupper($extension);
 		$outpath.='/'.$albumname;
 
