@@ -94,6 +94,7 @@ class metadata
 				'album'=>		'ALBUM',
 				'tracknumber'=>	'TRACKNUMBER',
 				'totaltracks'=>	'TRACKTOTAL',
+				'volumenumber'=>'DISCNUMBER',
 				'compilation'=>	'COMPILATION',
 				'isrc'=>		'ISRC',
 				'year'=>		'YEAR',
