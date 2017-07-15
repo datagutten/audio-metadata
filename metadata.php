@@ -195,14 +195,14 @@ class metadata
 		if(!file_exists($file))
 			return false;
 		$pathinfo=pathinfo($file);
-		$tmpfile='/tmp/'.$pathinfo['basename'].'.wav';
+		$tmpfile=sys_get_temp_dir().'/'.$pathinfo['basename'].'.wav';
 		$flac_file=sprintf('%s/%s.flac',$pathinfo['dirname'],$pathinfo['filename']);
 
-		shell_exec($cmd=sprintf('ffmpeg -n -i %s -f wav %s 2>&1',escapeshellarg($file),escapeshellarg($tmpfile))); //Convert to temporary wav file
+		$output=shell_exec($cmd=sprintf('ffmpeg -n -i %s -f wav %s 2>&1',escapeshellarg($file),escapeshellarg($tmpfile))); //Convert to temporary wav file
 		//shell_exec(sprintf('ffmpeg -n -i "%s" -f wav "%s"',$file,$tmpfile)); //Convert to temporary wav file
 		if(!file_exists($tmpfile))
 		{
-			$this->error='Error converting to temporary wav file';
+			$this->error="Error converting to temporary wav file:\n$output\n";
 			return false;
 		}
 		shell_exec(sprintf('flac -s -o %s %s',escapeshellarg($flac_file),escapeshellarg($tmpfile))); //Convert wav to flac
