@@ -16,7 +16,9 @@ class metadata
 		//Call global function from tools submodule
 		return filnavn($tittel);
 	}
-	function buildfilename($trackinfo)
+
+	//Build file name for a track
+	function build_file_name($trackinfo,$extension=false)
 	{
 		if(isset($trackinfo['compilation']) && $trackinfo['compilation']===true) //Artist skal bare være med i filnavn hvis det er et samlealbum
 			$trackname=sprintf('%s - %s',$trackinfo['artist'],$trackinfo['title']);
@@ -26,20 +28,14 @@ class metadata
 			$trackname=sprintf("%02d %s",$trackinfo['track'],$trackname);
 		if(!empty($trackinfo['totalvolumes']) && $trackinfo['totalvolumes']>1) //Multi volume album
 			$trackname=sprintf("%02d %s",$trackinfo['volumenumber'],$trackname);
+		if(!empty($extension))
+			$trackname.='.'.$extension;
 		return $this->filnavn($trackname);
 	}
 
-	function metadata($infile,$outpath,$trackinfo)
+	//Build directory name for a track
+	function build_directory_name($trackinfo,$extension=false)
 	{
-		if(!file_exists($infile) || !is_file($infile))
-		{
-			$this->error="$infile does not exist or is not a file";
-			return false;
-		}
-		$filename=$this->buildfilename($trackinfo);
-
-		$extension=pathinfo($infile,PATHINFO_EXTENSION);
-		
 		if(!empty($trackinfo['albumartist']))
 			$albumname=$this->filnavn(sprintf('%s - %s',$trackinfo['albumartist'],$trackinfo['album']));
 		else
@@ -49,34 +45,54 @@ class metadata
 			$albumname=sprintf('%s (%d)',$albumname,$trackinfo['albumyear']);
 		elseif(!empty($trackinfo['year']))
 			$albumname=sprintf('%s (%d)',$albumname,$trackinfo['year']);
+		if(!empty($extension))
+			$albumname.=' '.strtoupper($extension);
+		return $albumname;
+	}
 
-		$albumname.=' '.strtoupper($extension);
-		$outpath.='/'.$albumname;
+	//Write metadata to a file and move it to the correct path
+	function metadata($infile,$outpath,$trackinfo)
+	{
+		if(!file_exists($infile) || !is_file($infile))
+		{
+			$this->error="$infile does not exist or is not a file";
+			return false;
+		}
+		$extension=pathinfo($infile,PATHINFO_EXTENSION);
+		$filename=$this->build_file_name($trackinfo,$extension);
+		$album_dir=$outpath.'/'.$this->build_directory_name($trackinfo,$extension);
+		$output_file=$album_dir.'/'.$filename;
 
-		if(!file_exists($outpath))
-			mkdir($outpath,0777,true);
+		if(!file_exists($album_dir))
+			mkdir($album_dir,0777,true);
 
 		if(empty($trackinfo['cover']))
-			$artwork=false;
-		elseif(!file_exists($artwork=$outpath.'/'.$albumname.'.'.pathinfo($trackinfo['cover'],PATHINFO_EXTENSION)))
-			copy($trackinfo['cover'],$artwork);
-
-		$outfile=sprintf('%s/%s.%s',$outpath,$filename,$extension);
-		if(file_exists($outfile))
+			$artwork_file=false;
+		else
 		{
-			$this->error="$outfile exists";
+			$artwork_extension=pathinfo($trackinfo['cover'],PATHINFO_EXTENSION);
+			$artwork_file=$album_dir.'/'.$trackinfo['album'].'.'.$artwork_extension;
+			if(!file_exists($artwork_file))
+				copy($trackinfo['cover'],$artwork_file);
+		}
+
+		if(file_exists($output_file))
+		{
+			$this->error="$output_file exists";
 			return false;
 		}
 		if($extension=='flac')
-			return $this->metaflac($infile,$outfile,$trackinfo,$artwork);
+			return $this->metaflac($infile,$output_file,$trackinfo,$artwork_file);
 		elseif($extension=='m4a')
-			return $this->atomicparsley($infile,$outfile,$trackinfo,$artwork);
+			return $this->atomicparsley($infile,$output_file,$trackinfo,$artwork_file);
 		else
 		{
 			$this->error="Unsupported file extension: $extension";
 			return false;
 		}
 	}
+
+	//Write tags to flac files using metaflac
 	public function metaflac($infile,$outfile,$trackinfo,$artwork=false)
 	{
 		if($this->dependcheck->depend('metaflac')!==true)
@@ -134,6 +150,7 @@ class metadata
 		return implode("\n",$output);
 	}
 
+	//Write tags to m4a files using AtomicParsley
 	public function atomicparsley($infile,$outfile,$trackinfo,$artwork=false)
 	{
 		if($this->dependcheck->depend('AtomicParsley')!==true)
