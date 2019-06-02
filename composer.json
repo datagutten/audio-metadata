@@ -1,0 +1,13 @@
+{
+  "name": "datagutten/audio-metadata",
+  "description": "Tools for working with metadata in audio files",
+  "license": "GPL-3.0-or-later",
+  "require": {
+    "datagutten/tools": "*"
+  },
+  "autoload": {
+    "classmap": [
+      "AudioMetadata.php"
+    ]
+  }
+}

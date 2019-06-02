@@ -1,5 +1,6 @@
 <?Php
-class metadata
+require 'vendor/autoload.php';
+class AudioMetadata
 {
 	private $dependcheck;
 	public $fields=array('title','artist','album','tracknumber','totaltracks','compilation'); //albumartist
@@ -7,8 +8,6 @@ class metadata
 	public $error;
 	function __construct()
 	{
-		require_once 'tools/dependcheck.php';
-		require_once 'tools/filnavn.php';
 		$this->dependcheck=new dependcheck;
 	}
 	function filnavn($tittel)
