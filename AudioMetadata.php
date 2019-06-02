@@ -16,8 +16,13 @@ class AudioMetadata
 		return filnavn($tittel);
 	}
 
-	//Build file name for a track
-	function build_file_name($trackinfo,$extension=false)
+    /**
+     * Build file name for a track
+     * @param array $trackinfo
+     * @param string $extension
+     * @return string
+     */
+	function build_file_name($trackinfo,$extension=null)
 	{
 		if(isset($trackinfo['compilation']) && $trackinfo['compilation']===true) //Artist skal bare være med i filnavn hvis det er et samlealbum
 			$trackname=sprintf('%s - %s',$trackinfo['artist'],$trackinfo['title']);
@@ -32,8 +37,13 @@ class AudioMetadata
 		return $this->filnavn($trackname);
 	}
 
-	//Build directory name for a track
-	function build_directory_name($trackinfo,$extension=false)
+    /**
+     * Build directory name for a track
+     * @param array $trackinfo
+     * @param string $extension
+     * @return string Directory name
+     */
+	function build_directory_name($trackinfo,$extension=null)
 	{
 		if(!empty($trackinfo['albumartist']))
 			$albumname=$this->filnavn(sprintf('%s - %s',$trackinfo['albumartist'],$trackinfo['album']));
@@ -49,14 +59,20 @@ class AudioMetadata
 		return $albumname;
 	}
 
-	//Write metadata to a file and move it to the correct path
+    /**
+     * Write metadata to a file and move it to the correct path
+     * @param string $infile File to tag
+     * @param string $outpath Where to save the tagged file
+     * @param array $trackinfo
+     * @return string Tagged file
+     * @throws FileNotFoundException Input file not found
+     * @throws Exception
+     */
 	function metadata($infile,$outpath,$trackinfo)
 	{
 		if(!file_exists($infile) || !is_file($infile))
-		{
-			$this->error="$infile does not exist or is not a file";
-			return false;
-		}
+		    throw new FileNotFoundException($infile);
+
 		$extension=pathinfo($infile,PATHINFO_EXTENSION);
 		$filename=$this->build_file_name($trackinfo,$extension);
 		$album_dir=$outpath.'/'.$this->build_directory_name($trackinfo,$extension);
@@ -85,22 +101,30 @@ class AudioMetadata
 		elseif($extension=='m4a')
 			return $this->atomicparsley($infile,$output_file,$trackinfo,$artwork_file);
 		else
-		{
-			$this->error="Unsupported file extension: $extension";
-			return false;
-		}
+			throw new InvalidArgumentException(
+			    sprintf('Writing metadata to %s files not supported', $extension));
 	}
 
-	//Write tags to flac files using metaflac
-	public function metaflac($infile,$outfile,$trackinfo,$artwork=false)
+    /**
+     * Write tags to flac files using metaflac
+     * @param $infile
+     * @param $outfile
+     * @param $trackinfo
+     * @param string $artwork Artwork file to be embedded
+     * @return string Output from metaflac
+     * @throws Exception
+     */
+	public function metaflac($infile,$outfile,$trackinfo,$artwork=null)
 	{
-		if($this->dependcheck->depend('metaflac')!==true)
+		try{
+		    $this->dependcheck->depend('metaflac');
+        }
+        catch (DependencyFailedException $e)
 		{
-			$this->error="Metaflac not found, unable to write flac metadata";
-			return false;
+			throw new Exception('Metaflac not found, unable to write flac metadata');
 		}
 		if(substr($infile,-4,4)!='flac')
-			throw new Exception('File must have flac extension');
+			throw new InvalidArgumentException('File must have flac extension');
 
 		copy($infile,$outfile);
 		$options=array(
@@ -144,18 +168,28 @@ class AudioMetadata
 			return false;
 		}
 
-		if($artwork!==false && file_exists($artwork)) //Write artwork
+		if(!empty($artwork) && file_exists($artwork)) //Write artwork
 			shell_exec($cmd=sprintf("metaflac --import-picture-from=%s %s",escapeshellarg($artwork),escapeshellarg($outfile)));
 		return implode("\n",$output);
 	}
 
-	//Write tags to m4a files using AtomicParsley
-	public function atomicparsley($infile,$outfile,$trackinfo,$artwork=false)
+    /**
+     * Write tags to m4a files using AtomicParsley
+     * @param $infile
+     * @param $outfile
+     * @param $trackinfo
+     * @param string $artwork Artwork file to be embedded
+     * @return string Output from AtomicParsley
+     * @throws Exception
+     */
+	public function atomicparsley($infile,$outfile,$trackinfo,$artwork=null)
 	{
-		if($this->dependcheck->depend('AtomicParsley')!==true)
+	    try {
+            $this->dependcheck->depend('AtomicParsley');
+        }
+		catch (DependencyFailedException $e)
 		{
-			$this->error="AtomicParsley is not installed, unable to tag m4a files";
-			return false;
+			throw new Exception('AtomicParsley is not installed, unable to tag m4a files');
 		}
 		$cmd=sprintf('AtomicParsley "%s" --output "%s"',$infile,$outfile);
 
@@ -185,7 +219,7 @@ class AudioMetadata
 			$cmd.=sprintf(' '.$option_value,$trackinfo[$option_key]);
 		}
 
-		if($artwork!==false && file_exists($artwork))
+		if(!empty($artwork) && file_exists($artwork))
 			$cmd.=" --artwork ".escapeshellarg($artwork);
 
 		exec($cmd." 2>&1",$output,$return);
@@ -198,9 +232,9 @@ class AudioMetadata
 	}
 
     /**
-     *  Convert a file to flac
-     *  The file is converted via wav, so all metadata are removed
-     *  The flac file is saved in the same directory as the source file
+     * Convert a file to flac
+     * The file is converted via wav, so all metadata are removed
+     * The flac file is saved in the same directory as the source file
      * @param string $file File to be converted
      * @return string Converted flac file
      * @throws DependencyFailedException Thrown when flac or ffmpeg is not found
