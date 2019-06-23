@@ -10,14 +10,14 @@ class AudioMetadata
 	{
 		$this->dependcheck=new dependcheck;
 	}
-	function filnavn($tittel)
-	{
-		//Call global function from tools submodule
-		return filnavn($tittel);
-	}
-
-	//Build file name for a track
-	function build_file_name($trackinfo,$extension=false)
+	
+    /**
+     * Build file name for a track
+     * @param array $trackinfo Track info
+     * @param string $extension File extension
+     * @return string File mame
+     */
+	public static function build_file_name($trackinfo,$extension=null)
 	{
 		if(isset($trackinfo['compilation']) && $trackinfo['compilation']===true) //Artist skal bare være med i filnavn hvis det er et samlealbum
 			$trackname=sprintf('%s - %s',$trackinfo['artist'],$trackinfo['title']);
@@ -29,33 +29,44 @@ class AudioMetadata
 			$trackname=sprintf("%02d %s",$trackinfo['volumenumber'],$trackname);
 		if(!empty($extension))
 			$trackname.='.'.$extension;
-		return $this->filnavn($trackname);
+		return filnavn($trackname);
 	}
 
-	//Build directory name for a track
-	function build_directory_name($trackinfo,$extension=false)
+    /**
+     * Build directory name for a track
+     * @param array $track_info Array with track info
+     * @param string $extension File extension to use in folder name
+     * @return string Directory name
+     */
+	public static function build_directory_name($track_info, $extension=null)
 	{
-		if(!empty($trackinfo['albumartist']))
-			$albumname=$this->filnavn(sprintf('%s - %s',$trackinfo['albumartist'],$trackinfo['album']));
+		if(!empty($track_info['albumartist']))
+			$album_name=filnavn(sprintf('%s - %s',$track_info['albumartist'],$track_info['album']));
 		else
-			$albumname=$this->filnavn($trackinfo['album']); //No album artist
+			$album_name=filnavn($track_info['album']); //No album artist
 
-		if(!empty($trackinfo['albumyear']))
-			$albumname=sprintf('%s (%d)',$albumname,$trackinfo['albumyear']);
-		elseif(!empty($trackinfo['year']))
-			$albumname=sprintf('%s (%d)',$albumname,$trackinfo['year']);
+		if(!empty($track_info['albumyear']))
+			$album_name=sprintf('%s (%d)',$album_name,$track_info['albumyear']);
+		elseif(!empty($track_info['year']))
+			$album_name=sprintf('%s (%d)',$album_name,$track_info['year']);
 		if(!empty($extension))
-			$albumname.=' '.strtoupper($extension);
-		return $albumname;
+			$album_name.=' '.strtoupper($extension);
+		return $album_name;
 	}
 
-	//Write metadata to a file and move it to the correct path
+    /**
+     * Write metadata to a file and move it to the correct path
+     * @param $infile
+     * @param $outpath
+     * @param $trackinfo
+     * @return bool|string
+     * @throws Exception
+     */
 	function metadata($infile,$outpath,$trackinfo)
 	{
 		if(!file_exists($infile) || !is_file($infile))
 		{
-			$this->error="$infile does not exist or is not a file";
-			return false;
+			throw new InvalidArgumentException("$infile does not exist or is not a file");
 		}
 		$extension=pathinfo($infile,PATHINFO_EXTENSION);
 		$filename=$this->build_file_name($trackinfo,$extension);
@@ -91,16 +102,22 @@ class AudioMetadata
 		}
 	}
 
-	//Write tags to flac files using metaflac
-	public function metaflac($infile,$outfile,$trackinfo,$artwork=false)
+    /**
+     * Write tags to flac files using metaflac
+     * @param string $infile File to be renamed
+     * @param string $outfile Where to save the renamed file
+     * @param array $trackinfo Track info
+     * @param string $artwork Artwork file to embed
+     * @return string Renamed file
+     * @throws DependencyFailedException metaflac not found
+     * @throws Exception Failed to write metadata
+     */
+	public function metaflac($infile,$outfile,$trackinfo,$artwork=null)
 	{
-		if($this->dependcheck->depend('metaflac')!==true)
-		{
-			$this->error="Metaflac not found, unable to write flac metadata";
-			return false;
-		}
+		$this->dependcheck->depend('metaflac');
+
 		if(substr($infile,-4,4)!='flac')
-			throw new Exception('File must have flac extension');
+			throw new InvalidArgumentException('File must have flac extension');
 
 		copy($infile,$outfile);
 		$options=array(
@@ -140,23 +157,28 @@ class AudioMetadata
 
 		if($return!=0)
 		{
-			$this->error=implode("\n",$output);
-			return false;
+			throw new Exception(implode("\n",$output));
 		}
 
-		if($artwork!==false && file_exists($artwork)) //Write artwork
+		if(!empty($artwork) && file_exists($artwork)) //Write artwork
 			shell_exec($cmd=sprintf("metaflac --import-picture-from=%s %s",escapeshellarg($artwork),escapeshellarg($outfile)));
 		return implode("\n",$output);
 	}
 
-	//Write tags to m4a files using AtomicParsley
-	public function atomicparsley($infile,$outfile,$trackinfo,$artwork=false)
+    /**
+     * Write tags to m4a files using AtomicParsley
+     * Write tags to flac files using metaflac
+     * @param string $infile File to be renamed
+     * @param string $outfile Where to save the renamed file
+     * @param array $trackinfo Track info
+     * @param string $artwork Artwork file to embed
+     * @return string Renamed file
+     * @throws DependencyFailedException AtomicParsley not found
+     * @throws Exception Failed to write metadata
+     */
+	public function atomicparsley($infile,$outfile,$trackinfo,$artwork=null)
 	{
-		if($this->dependcheck->depend('AtomicParsley')!==true)
-		{
-			$this->error="AtomicParsley is not installed, unable to tag m4a files";
-			return false;
-		}
+		$this->dependcheck->depend('AtomicParsley');
 		$cmd=sprintf('AtomicParsley "%s" --output "%s"',$infile,$outfile);
 
 		if(isset($trackinfo['compilation']))
@@ -185,14 +207,13 @@ class AudioMetadata
 			$cmd.=sprintf(' '.$option_value,$trackinfo[$option_key]);
 		}
 
-		if($artwork!==false && file_exists($artwork))
+		if(!empty($artwork) && file_exists($artwork))
 			$cmd.=" --artwork ".escapeshellarg($artwork);
 
 		exec($cmd." 2>&1",$output,$return);
 		if($return!=0)
 		{
-			$this->error=implode("\n",$output);
-			return false;
+			throw new Exception(implode("\n",$output));
 		}
 		return implode("\n",$output);
 	}
