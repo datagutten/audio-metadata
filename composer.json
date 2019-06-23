@@ -3,7 +3,7 @@
   "description": "Tools for working with metadata in audio files",
   "license": "GPL-3.0-or-later",
   "require": {
-    "datagutten/tools": "*"
+    "datagutten/tools": "^1.1"
   },
   "autoload": {
     "classmap": [
