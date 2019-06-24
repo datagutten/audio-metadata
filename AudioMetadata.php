@@ -255,4 +255,27 @@ class AudioMetadata
 		unlink($tmpfile); //Remove temporary wav file
 		return $flac_file;
 	}
+
+    /**
+     * Get metadata from a file
+     * @param $file
+     * @return array
+     * @throws FileNotFoundException
+     */
+	public static function read_metadata($file)
+    {
+        if(!file_exists($file) || !is_file($file))
+            throw new FileNotFoundException($file);
+        $extension = pathinfo($file, PATHINFO_EXTENSION);
+
+        if($extension==='flac')
+        {
+            $metadata_raw=shell_exec(sprintf('metaflac --list "%s"',$file));
+            preg_match_all('/comment\[[0-9]+\]\: ([A-Z\_]+)=(.+)/',$metadata_raw,$metadata_raw2);
+            $metadata=array_combine($metadata_raw2[1],$metadata_raw2[2]);
+            return $metadata;
+        }
+        else
+            throw new InvalidArgumentException(sprintf('Reading metadata from %s files not supported', $extension));
+    }
 }
