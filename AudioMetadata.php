@@ -219,44 +219,6 @@ class AudioMetadata
 	}
 
     /**
-     *  Convert a file to flac
-     *  The file is converted via wav, so all metadata are removed
-     *  The flac file is saved in the same directory as the source file
-     * @param string $file File to be converted
-     * @return string Converted flac file
-     * @throws DependencyFailedException Thrown when flac or ffmpeg is not found
-     * @throws FileNotFoundException Thrown when input file is not found
-     * @throws Exception Thrown when conversion fails
-     */
-	function convert_to_flac($file)
-	{
-        $this->dependcheck->depend('flac');
-        $this->dependcheck->depend('ffmpeg');
-
-		if(!file_exists($file))
-			throw new FileNotFoundException($file);
-
-		$pathinfo=pathinfo($file);
-		$tmpfile=sys_get_temp_dir().'/'.$pathinfo['basename'].'.wav';
-		$flac_file=sprintf('%s/%s.flac',$pathinfo['dirname'],$pathinfo['filename']);
-
-		$output=shell_exec($cmd=sprintf('ffmpeg -n -i %s -f wav %s 2>&1',escapeshellarg($file),escapeshellarg($tmpfile))); //Convert to temporary wav file
-		//shell_exec(sprintf('ffmpeg -n -i "%s" -f wav "%s"',$file,$tmpfile)); //Convert to temporary wav file
-		if(!file_exists($tmpfile))
-		{
-			$this->error="Error converting to temporary wav file:\n$output\n";
-			return false;
-		}
-		shell_exec(sprintf('flac -s -o %s %s',escapeshellarg($flac_file),escapeshellarg($tmpfile))); //Convert wav to flac
-
-		if(!file_exists($flac_file))
-			throw new Exception('Error converting to flac');
-
-		unlink($tmpfile); //Remove temporary wav file
-		return $flac_file;
-	}
-
-    /**
      * Get metadata from a file
      * @param $file
      * @return array

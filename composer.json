@@ -3,11 +3,13 @@
   "description": "Tools for working with metadata in audio files",
   "license": "GPL-3.0-or-later",
   "require": {
-    "datagutten/tools": "^1.1"
+    "datagutten/tools": "^1.1",
+    "symfony/process": "^4.3"
   },
   "autoload": {
     "classmap": [
-      "AudioMetadata.php"
+      "AudioMetadata.php",
+      "AudioConvert.php"
     ]
   }
 }
