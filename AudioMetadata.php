@@ -98,10 +98,7 @@ class AudioMetadata
 		elseif($extension=='m4a')
 			return $this->atomicparsley($infile,$output_file,$trackinfo,$artwork_file);
 		else
-		{
-			$this->error="Unsupported file extension: $extension";
-			return false;
-		}
+			throw new InvalidArgumentException("Unsupported file extension: $extension");
 	}
 
     /**
