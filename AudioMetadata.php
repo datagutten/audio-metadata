@@ -192,7 +192,7 @@ class AudioMetadata
 	public function atomicparsley($infile,$outfile,$trackinfo,$artwork=null)
 	{
 		$this->dependcheck->depend('AtomicParsley');
-		$cmd=sprintf('AtomicParsley "%s" --output "%s"',$infile,$outfile);
+		$arguments = array('AtomicParsley', $infile, '--output', $outfile);
 
 		if(isset($trackinfo['compilation']))
 		{
@@ -201,13 +201,15 @@ class AudioMetadata
 			elseif($trackinfo['compilation']===false)
 				$trackinfo['compilation']='false';
 		}
-		$options=array('artist'=>		'--artist="%s"',
-						'title'=>		'--title="%s"',
-						'album'=>		'--album="%s"',
-						'tracknumber'=>	'--tracknum=%d',
-						'compilation'=>	'--compilation="%s"');
-		if(isset($trackinfo['tracknumber']) && isset($trackinfo['totaltracks']))
-			$options['tracknumber']=sprintf('--tracknum=%d/%d',$trackinfo['tracknumber'],$trackinfo['totaltracks']);
+		$options=array('artist'=>		'--artist=',
+						'title'=>		'--title=',
+						'album'=>		'--album=',
+						'compilation'=>	'--compilation=');
+		if(isset($trackinfo['tracknumber']) && isset($trackinfo['totaltracks'])) {
+            $arguments[] = sprintf('--tracknum=%d/%d', $trackinfo['tracknumber'], $trackinfo['totaltracks']);
+        }
+		else
+		    $arguments[] = sprintf('--tracknum=%d', $trackinfo['tracknumber']);
 
 		foreach($options as $option_key=>$option_value)
 		{
@@ -217,18 +219,21 @@ class AudioMetadata
 					echo "No value for $option_key\n";
 				continue;
 			}
-			$cmd.=sprintf(' '.$option_value,$trackinfo[$option_key]);
+            $arguments[] = $option_value.$trackinfo[$option_key];
 		}
 
-		if(!empty($artwork) && file_exists($artwork))
-			$cmd.=" --artwork ".escapeshellarg($artwork);
+		if(!empty($artwork) && file_exists($artwork)) {
+            $arguments[] = '--artwork';
+            $arguments[] = $artwork;
+        }
+		$process = new Process($arguments);
 
-		exec($cmd." 2>&1",$output,$return);
-		if($return!=0)
-		{
-			throw new Exception(implode("\n",$output));
-		}
-		return implode("\n",$output);
+        $process->run();
+        if (!$process->isSuccessful()) {
+            throw new ProcessFailedException($process);
+        }
+
+        return $outfile;
 	}
 
     /**
