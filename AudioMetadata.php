@@ -1,5 +1,7 @@
 <?Php
 require 'vendor/autoload.php';
+use Symfony\Component\Process\Exception\ProcessFailedException;
+use Symfony\Component\Process\Process;
 class AudioMetadata
 {
 	private $dependcheck;
@@ -140,8 +142,15 @@ class AudioMetadata
 			else
 				unset($trackinfo['compilation']);
 		}
-		shell_exec($cmd=sprintf('metaflac --remove-all %s',escapeshellarg($outfile))); //Remove any existing metadata
-		$cmd='metaflac';
+
+		$process = new Process(['metaflac', '--remove-all', $outfile]); //Remove any existing metadata
+		$process->run();
+        if (!$process->isSuccessful()) {
+            throw new ProcessFailedException($process);
+        }
+
+        $arguments = array('metaflac');
+
 		foreach($options as $field_name=>$command_key) //Check which options we have data for and them to the command
 		{
 			if(!isset($trackinfo[$field_name]))
@@ -150,19 +159,26 @@ class AudioMetadata
 					echo "No value for $field_name\n";
 				continue;
 			}
-			$cmd.=sprintf(' --set-tag=%s',escapeshellarg($command_key.'='.$trackinfo[$field_name]));
+            $arguments[] = sprintf('--set-tag=%s=%s', $command_key, $trackinfo[$field_name]);
 		}
-		$cmd.=' '.escapeshellarg($outfile); //Add the filename to the command
-		exec($cmd." 2>&1",$output,$return);
+		$arguments[] = $outfile;
 
-		if($return!=0)
-		{
-			throw new Exception(implode("\n",$output));
-		}
+		$process = new Process($arguments);
+        $process->run();
+        if (!$process->isSuccessful()) {
+            throw new ProcessFailedException($process);
+        }
 
 		if(!empty($artwork) && file_exists($artwork)) //Write artwork
-			shell_exec($cmd=sprintf("metaflac --import-picture-from=%s %s",escapeshellarg($artwork),escapeshellarg($outfile)));
-		return implode("\n",$output);
+        {
+            $process_artwork = new Process(['metaflac', '--import-picture-from='.$artwork, $outfile]);
+            $process_artwork->run();
+            if (!$process_artwork->isSuccessful()) {
+                throw new ProcessFailedException($process_artwork);
+            }
+        }
+
+		return $outfile;
 	}
 
     /**
