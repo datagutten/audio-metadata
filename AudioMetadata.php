@@ -248,11 +248,15 @@ class AudioMetadata
             throw new FileNotFoundException($file);
         $extension = pathinfo($file, PATHINFO_EXTENSION);
 
-        if($extension==='flac')
-        {
-            $metadata_raw=shell_exec(sprintf('metaflac --list "%s"',$file));
-            preg_match_all('/comment\[[0-9]+\]\: ([A-Z\_]+)=(.+)/',$metadata_raw,$metadata_raw2);
-            $metadata=array_combine($metadata_raw2[1],$metadata_raw2[2]);
+        if($extension==='flac') {
+            $process = new Process(['metaflac', '--list', $file]);
+            $process->run();
+            if (!$process->isSuccessful()) {
+                throw new ProcessFailedException($process);
+            }
+            $metadata_raw = $process->getOutput();
+            preg_match_all('/comment\[[0-9]+\]\: ([A-Z\_]+)=(.+)/', $metadata_raw, $metadata_raw2);
+            $metadata = array_combine($metadata_raw2[1], $metadata_raw2[2]);
             return $metadata;
         }
         else
