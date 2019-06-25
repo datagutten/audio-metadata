@@ -61,7 +61,7 @@ class AudioMetadata
      * @param $infile
      * @param $outpath
      * @param $trackinfo
-     * @return bool|string
+     * @return string Renamed file
      * @throws Exception
      */
 	function metadata($infile,$outpath,$trackinfo)
@@ -90,8 +90,8 @@ class AudioMetadata
 
 		if(file_exists($output_file))
 		{
-			$this->error="$output_file exists";
-			return false;
+			echo "$output_file exists\n";
+			return $output_file;
 		}
 		if($extension=='flac')
 			return $this->metaflac($infile,$output_file,$trackinfo,$artwork_file);
