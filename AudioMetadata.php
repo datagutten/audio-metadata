@@ -76,8 +76,8 @@ class AudioMetadata
 			throw new InvalidArgumentException("$infile does not exist or is not a file");
 		}
 		$extension=pathinfo($infile,PATHINFO_EXTENSION);
-		$filename=$this->build_file_name($trackinfo,$extension);
-		$album_dir=$outpath.'/'.$this->build_directory_name($trackinfo,$extension);
+		$filename=self::build_file_name($trackinfo,$extension);
+		$album_dir=$outpath.'/'.self::build_directory_name($trackinfo,$extension);
 		$output_file=$album_dir.'/'.$filename;
 
 		if(!file_exists($album_dir))
