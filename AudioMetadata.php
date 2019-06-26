@@ -8,6 +8,11 @@ class AudioMetadata
 	public $fields=array('title','artist','album','tracknumber','totaltracks','compilation'); //albumartist
 	public $debug=false;
 	public $error;
+    /**
+     * @var bool Suppress all user output
+     */
+	public $silent=false;
+
 	function __construct()
 	{
 		$this->dependcheck=new dependcheck;
@@ -90,9 +95,16 @@ class AudioMetadata
 
 		if(file_exists($output_file))
 		{
-			echo "$output_file exists\n";
+		    if(!$this->silent)
+			    echo "$output_file exists\n";
 			return $output_file;
 		}
+		else
+        {
+            if(!$this->silent)
+                printf("Renamed %s to %s\n", $infile, $output_file);
+        }
+
 		if($extension=='flac')
 			return $this->metaflac($infile,$output_file,$trackinfo,$artwork_file);
 		elseif($extension=='m4a')
