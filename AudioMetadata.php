@@ -258,6 +258,7 @@ class AudioMetadata
             }
             $metadata_raw = $process->getOutput();
             preg_match_all('/comment\[[0-9]+\]\: ([A-Z\_]+)=(.+)/', $metadata_raw, $metadata_raw2);
+            $metadata_raw2[2] = array_map('trim', $metadata_raw2[2]);
             $metadata = array_combine($metadata_raw2[1], $metadata_raw2[2]);
             return $metadata;
         }
