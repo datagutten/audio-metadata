@@ -1,5 +1,4 @@
 <?Php
-require 'vendor/autoload.php';
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
 class AudioMetadata
