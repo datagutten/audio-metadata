@@ -122,6 +122,8 @@ class AudioMetadata
      */
 	public static function metaflac($infile,$outfile,$trackinfo,$artwork=null)
 	{
+	    if(!file_exists($infile))
+	        throw new FileNotFoundException($infile);
 		if(substr($infile,-4,4)!='flac')
 			throw new InvalidArgumentException('File must have flac extension');
 
@@ -193,6 +195,9 @@ class AudioMetadata
      */
 	public static function atomicparsley($infile,$outfile,$trackinfo,$artwork=null)
 	{
+	    if(!file_exists($infile))
+	        throw new FileNotFoundException($infile);
+
 		$arguments = array('AtomicParsley', $infile, '--output', $outfile);
 
 		if(isset($trackinfo['compilation']))
