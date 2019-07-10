@@ -106,7 +106,7 @@ class AudioMetadata
 
 		if($extension=='flac')
 			return $this->metaflac($infile,$output_file,$trackinfo,$artwork_file);
-		elseif($extension=='m4a')
+		elseif($extension=='m4a' || $extension=='mp4')
 			return $this->atomicparsley($infile,$output_file,$trackinfo,$artwork_file);
 		else
 			throw new InvalidArgumentException("Unsupported file extension: $extension");
