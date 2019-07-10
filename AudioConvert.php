@@ -55,10 +55,16 @@ class AudioConvert
             throw new FileNotFoundException($file);
 
         $pathinfo = pathinfo($file);
+        $flac_file = sprintf('%s/%s.flac', $pathinfo['dirname'], $pathinfo['filename']);
+        if(file_exists($flac_file))
+            return $flac_file;
+
         $tmp_file = sys_get_temp_dir() . '/' . $pathinfo['basename'] . '.wav';
+        if(file_exists($tmp_file))
+            unlink($tmp_file);
         self::convert_to_wav($file, $tmp_file);
 
-        $flac_file = sprintf('%s/%s.flac', $pathinfo['dirname'], $pathinfo['filename']);
+
 
         $process_flac = new Process(['flac', '-s', '-o', $flac_file, $tmp_file]);
         $process_flac->run();
