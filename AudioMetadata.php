@@ -3,19 +3,17 @@ use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
 class AudioMetadata
 {
-	private $dependcheck;
 	public $fields=array('title','artist','album','tracknumber','totaltracks','compilation'); //albumartist
-	public $debug=false;
-	public $error;
     /**
-     * @var bool Suppress all user output
+     * Check if metaflac and AtomicParsley are installed
+     * @throws DependencyFailedException
      */
-	public $silent=false;
-
-	function __construct()
-	{
-		$this->dependcheck=new dependcheck;
-	}
+	public static function check_dependencies()
+    {
+        $dependcheck = new dependcheck;
+        $dependcheck->depend('metaflac');
+        $dependcheck->depend('AtomicParsley');
+    }
 	
     /**
      * Build file name for a track
@@ -65,10 +63,11 @@ class AudioMetadata
      * @param $infile
      * @param $outpath
      * @param $trackinfo
+     * @param bool $silent Do not show user output
      * @return string Renamed file
      * @throws Exception
      */
-	function metadata($infile,$outpath,$trackinfo)
+	public static function metadata($infile,$outpath,$trackinfo, $silent = false)
 	{
 		if(!file_exists($infile) || !is_file($infile))
 		{
@@ -94,20 +93,20 @@ class AudioMetadata
 
 		if(file_exists($output_file))
 		{
-		    if(!$this->silent)
+		    if(!$silent)
 			    echo "$output_file exists\n";
 			return $output_file;
 		}
 		else
         {
-            if(!$this->silent)
+            if(!$silent)
                 printf("Renamed %s to %s\n", $infile, $output_file);
         }
 
 		if($extension=='flac')
-			return $this->metaflac($infile,$output_file,$trackinfo,$artwork_file);
+			return self::metaflac($infile,$output_file,$trackinfo,$artwork_file);
 		elseif($extension=='m4a' || $extension=='mp4')
-			return $this->atomicparsley($infile,$output_file,$trackinfo,$artwork_file);
+			return self::atomicparsley($infile,$output_file,$trackinfo,$artwork_file);
 		else
 			throw new InvalidArgumentException("Unsupported file extension: $extension");
 	}
@@ -119,13 +118,10 @@ class AudioMetadata
      * @param array $trackinfo Track info
      * @param string $artwork Artwork file to embed
      * @return string Renamed file
-     * @throws DependencyFailedException metaflac not found
      * @throws Exception Failed to write metadata
      */
-	public function metaflac($infile,$outfile,$trackinfo,$artwork=null)
+	public static function metaflac($infile,$outfile,$trackinfo,$artwork=null)
 	{
-		$this->dependcheck->depend('metaflac');
-
 		if(substr($infile,-4,4)!='flac')
 			throw new InvalidArgumentException('File must have flac extension');
 
@@ -162,11 +158,7 @@ class AudioMetadata
 		foreach($options as $field_name=>$command_key) //Check which options we have data for and them to the command
 		{
 			if(!isset($trackinfo[$field_name]))
-			{
-				if($this->debug)
-					echo "No value for $field_name\n";
-				continue;
-			}
+			    continue;
             $arguments[] = sprintf('--set-tag=%s=%s', $command_key, $trackinfo[$field_name]);
 		}
 		$arguments[] = $outfile;
@@ -197,12 +189,10 @@ class AudioMetadata
      * @param array $trackinfo Track info
      * @param string $artwork Artwork file to embed
      * @return string Renamed file
-     * @throws DependencyFailedException AtomicParsley not found
      * @throws Exception Failed to write metadata
      */
-	public function atomicparsley($infile,$outfile,$trackinfo,$artwork=null)
+	public static function atomicparsley($infile,$outfile,$trackinfo,$artwork=null)
 	{
-		$this->dependcheck->depend('AtomicParsley');
 		$arguments = array('AtomicParsley', $infile, '--output', $outfile);
 
 		if(isset($trackinfo['compilation']))
@@ -225,11 +215,7 @@ class AudioMetadata
 		foreach($options as $option_key=>$option_value)
 		{
 			if(!isset($trackinfo[$option_key]))
-			{
-				if($this->debug)
-					echo "No value for $option_key\n";
 				continue;
-			}
             $arguments[] = $option_value.$trackinfo[$option_key];
 		}
 
