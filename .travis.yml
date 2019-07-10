@@ -14,9 +14,9 @@ matrix:
     - php: '7.4'
     - php: 'nightly'
 
-install:
- - apt-get install flac
- - apt-get install atomicparsley
+before_install:
+ - sudo apt-get -y install flac
+ - sudo apt-get -y install atomicparsley
 
 before_script:
  - vendor/bin/phpunit --version
