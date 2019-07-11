@@ -1,6 +1,8 @@
 <?Php
+
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
+
 class AudioMetadata
 {
 	public $fields=array('title','artist','album','tracknumber','totaltracks','compilation'); //albumartist
@@ -105,10 +107,11 @@ class AudioMetadata
      * @param string $outfile Where to save the renamed file
      * @param array $trackinfo Track info
      * @param string $artwork Artwork file to embed
+     * @param bool $remove_existing Remove existing metadata
      * @return string Renamed file
      * @throws Exception Failed to write metadata
      */
-	public static function metaflac($infile,$outfile,$trackinfo,$artwork=null)
+	public static function metaflac($infile,$outfile,$trackinfo,$artwork=null, $remove_existing = true)
 	{
 	    if(!file_exists($infile))
 	        throw new FileNotFoundException($infile);
@@ -137,11 +140,12 @@ class AudioMetadata
 			else
 				unset($trackinfo['compilation']);
 		}
-
-		$process = new Process(['metaflac', '--remove-all', $outfile]); //Remove any existing metadata
-		$process->run();
-        if (!$process->isSuccessful()) {
-            throw new ProcessFailedException($process);
+        if($remove_existing === true) {
+            $process = new Process(['metaflac', '--remove-all', $outfile]); //Remove any existing metadata
+            $process->run();
+            if (!$process->isSuccessful()) {
+                throw new ProcessFailedException($process);
+            }
         }
 
         $arguments = array('metaflac');

@@ -169,12 +169,4 @@ abstract class MetadataTestAbstract extends TestCase
         }
         $this->assertNotFalse(true);
     }
-    public function testInvalidTagValue()
-    {
-        $this->expectException(ProcessFailedException::class);
-        $info = array('title'=>str_repeat('a', 1024*10));
-        AudioMetadata::write_metadata($this->valid_file, $this->output_file, $info);
-        $info = array('title'=>str_repeat('a', 1024*1000));
-        AudioMetadata::write_metadata($this->valid_file, $this->output_file, $info);
-    }
 }
