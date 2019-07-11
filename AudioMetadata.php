@@ -30,8 +30,8 @@ class AudioMetadata
 			$trackname=sprintf('%s - %s',$trackinfo['artist'],$trackinfo['title']);
 		else
 			$trackname=$trackinfo['title'];
-		if(!empty($trackinfo['track']))
-			$trackname=sprintf("%02d %s",$trackinfo['track'],$trackname);
+		if(!empty($trackinfo['tracknumber']))
+			$trackname=sprintf("%02d %s",$trackinfo['tracknumber'],$trackname);
 		if(!empty($trackinfo['totalvolumes']) && $trackinfo['totalvolumes']>1) //Multi volume album
 			$trackname=sprintf("%02d %s",$trackinfo['volumenumber'],$trackname);
 		if(!empty($extension))
