@@ -27,6 +27,8 @@ before_script:
  - mkdir tests/sample_data
  - wget -O tests/sample_data/test.flac http://techslides.com/demos/samples/sample.flac
  - wget -O tests/sample_data/test.m4a http://techslides.com/demos/samples/sample.m4a
+ - wget -O tests/sample_data/artwork.jpg http://techslides.com/demos/samples/sample.jpg
+ - wget -O tests/sample_data/invalid.jpg http://techslides.com/demos/samples/sample.txt
 
 script:
  - vendor/bin/phpunit --bootstrap vendor/autoload.php tests
