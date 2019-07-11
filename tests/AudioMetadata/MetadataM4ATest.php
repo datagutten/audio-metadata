@@ -1,5 +1,7 @@
 <?php
-namespace datagutten\AudioMetadata\tests;
+
+namespace datagutten\AudioMetadata\tests\AudioMetadata;
+
 use AudioMetadata;
 use FileNotFoundException;
 use InvalidArgumentException;

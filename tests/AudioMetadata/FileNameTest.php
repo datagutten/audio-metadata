@@ -1,7 +1,7 @@
 <?php
 
+namespace datagutten\AudioMetadata\tests\AudioMetadata;
 
-namespace datagutten\AudioMetadata\tests;
 use AudioMetadata;
 use PHPUnit\Framework\TestCase;
 

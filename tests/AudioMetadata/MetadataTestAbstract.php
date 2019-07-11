@@ -1,13 +1,13 @@
 <?php
 
-namespace datagutten\AudioMetadata\tests;
+namespace datagutten\AudioMetadata\tests\AudioMetadata;
 
-use PHPUnit\Framework\TestCase;
-use Symfony\Component\Process\Exception\ProcessFailedException;
 use AudioMetadata;
 use DependencyFailedException;
-use FileNotFoundException;
 use Exception;
+use FileNotFoundException;
+use PHPUnit\Framework\TestCase;
+use Symfony\Component\Process\Exception\ProcessFailedException;
 
 /**
  * @codeCoverageIgnore
@@ -19,11 +19,13 @@ abstract class MetadataTestAbstract extends TestCase
     public $test_files_dir;
     public $valid_file;
     public $output_file;
+    protected $sample_dir;
     protected $info = array('artist'=>'No. 4', 'title'=>'Det finnes bare vi', 'tracknumber'=>'9', 'album'=>'Hva na', 'albumartist'=>'No. 4');
     public function __construct($name = null, array $data = [], $dataName = '')
     {
         parent::__construct($name, $data, $dataName);
-        $this->valid_file = __DIR__.'/sample_data/test.'.$this->extension;
+        $this->sample_dir = __DIR__.'/../sample_data';
+        $this->valid_file = $this->sample_dir.'/test.'.$this->extension;
     }
 
     public function setUp(): void
@@ -71,7 +73,8 @@ abstract class MetadataTestAbstract extends TestCase
      */
     function testWriteMetadataWithCover()
     {
-        $file = AudioMetadata::metadata($this->valid_file, dirname($this->output_file), $this->info + ['cover'=>__DIR__.'/sample_data/artwork.jpg']);
+        $file = AudioMetadata::metadata($this->valid_file, dirname($this->output_file),
+            $this->info + ['cover'=>$this->sample_dir.'/artwork.jpg']);
         $this->assertNotEmpty($file);
         $this->assertFileExists($file);
         $cover_file = dirname($file).'/'.$this->info['album'].'.jpg';
@@ -129,13 +132,13 @@ abstract class MetadataTestAbstract extends TestCase
     }
     public function testArtwork()
     {
-        AudioMetadata::write_metadata($this->valid_file, $this->output_file, $this->info,__DIR__.'/sample_data/artwork.jpg');
+        AudioMetadata::write_metadata($this->valid_file, $this->output_file, $this->info,$this->sample_dir.'/artwork.jpg');
         $this->addToAssertionCount(1);
     }
     public function testInvalidArtwork()
     {
         $this->expectException(ProcessFailedException::class);
-        AudioMetadata::write_metadata($this->valid_file, $this->output_file, $this->info, __DIR__.'/sample_data/invalid.jpg');
+        AudioMetadata::write_metadata($this->valid_file, $this->output_file, $this->info, $this->sample_dir.'/invalid.jpg');
     }
     public function testMultiDisc()
     {
