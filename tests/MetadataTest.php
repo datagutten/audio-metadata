@@ -32,8 +32,14 @@ class MetadataTest extends TestCase
     }
 
     /**
-     * @throws FileNotFoundException
+     * @throws Exception
      */
+    public function testMissingArtwork()
+    {
+        $this->expectException(FileNotFoundException::class);
+        AudioMetadata::write_metadata(null, null, null, 'missing.jpg');
+    }
+
     public function testWriteMetadataFlac()
     {
         $dependcheck = new dependcheck();

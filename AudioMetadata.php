@@ -167,7 +167,7 @@ class AudioMetadata
             throw new ProcessFailedException($process);
         }
 
-		if(!empty($artwork) && file_exists($artwork)) //Write artwork
+		if(!empty($artwork)) //Write artwork
         {
             $process_artwork = new Process(['metaflac', '--import-picture-from='.$artwork, $outfile]);
             $process_artwork->run();
@@ -220,7 +220,7 @@ class AudioMetadata
             $arguments[] = $option_value.$trackinfo[$option_key];
 		}
 
-		if(!empty($artwork) && file_exists($artwork)) {
+		if(!empty($artwork)) {
             $arguments[] = '--artwork';
             $arguments[] = $artwork;
         }
@@ -245,6 +245,9 @@ class AudioMetadata
      */
 	public static function write_metadata($infile, $outfile, $metadata, $artwork = null)
     {
+        if(!empty($artwork) && !file_exists($artwork))
+            throw new FileNotFoundException($artwork);
+
         $extension = pathinfo($infile, PATHINFO_EXTENSION);
         if($extension==='flac')
             return self::metaflac($infile, $outfile, $metadata, $artwork);
