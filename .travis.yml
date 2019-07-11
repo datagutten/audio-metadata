@@ -24,6 +24,9 @@ install:
 
 before_script:
  - vendor/bin/phpunit --version
+ - mkdir tests/sample_data
+ - wget -O tests/sample_data/test.flac http://techslides.com/demos/samples/sample.flac
+ - wget -O tests/sample_data/test.m4a http://techslides.com/demos/samples/sample.m4a
 
 script:
  - vendor/bin/phpunit --bootstrap vendor/autoload.php tests
