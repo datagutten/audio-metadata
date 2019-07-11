@@ -234,6 +234,15 @@ class AudioMetadata
         return $outfile;
 	}
 
+    /**
+     * Write tags to FLAC files using metaflac or MPEG4 with AtomicParsley
+     * @param string $infile File to be renamed
+     * @param string $outfile Where to save the renamed file
+     * @param array $metadata Metadata to be written
+     * @param string $artwork Artwork file to embed
+     * @return string Value of argument $outfile
+     * @throws Exception Failed to write metadata
+     */
 	public static function write_metadata($infile, $outfile, $metadata, $artwork = null)
     {
         $extension = pathinfo($infile, PATHINFO_EXTENSION);
