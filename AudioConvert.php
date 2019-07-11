@@ -1,4 +1,5 @@
 <?php
+
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
 
@@ -29,6 +30,8 @@ class AudioConvert
         $pathinfo = pathinfo($file);
         if(empty($converted_file))
             $converted_file = sprintf('%s/%s.wav', $pathinfo['dirname'], $pathinfo['filename']);
+        if(file_exists($converted_file))
+            return $converted_file;
 
         $process_ffmpeg = new Process(['ffmpeg', '-n', '-i', $file, '-f', 'wav', $converted_file]);
         $process_ffmpeg->run();
