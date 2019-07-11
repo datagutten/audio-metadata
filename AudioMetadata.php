@@ -113,7 +113,10 @@ class AudioMetadata
 	    if(!file_exists($infile))
 	        throw new FileNotFoundException($infile);
 
-		copy($infile,$outfile);
+		@copy($infile,$outfile);
+		if(!file_exists($outfile))
+            throw new Exception('Unable to create output file');
+
 		$options=array(
 				'artist'=>		'ARTIST',
 				'title'=>		'TITLE',
