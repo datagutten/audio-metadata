@@ -48,17 +48,22 @@ class AudioConvert
      *  The file is converted via wav, so all metadata are removed
      *  The flac file is saved in the same directory as the source file
      * @param string $file File to be converted
+     * @param string $converted_file File name for the converted file
      * @return string Converted flac file
      * @throws FileNotFoundException Thrown when input file is not found
      * @throws Exception Thrown when conversion fails
      */
-    public static function convert_to_flac($file)
+    public static function convert_to_flac($file, $converted_file = null)
     {
         if (!file_exists($file))
             throw new FileNotFoundException($file);
 
         $pathinfo = pathinfo($file);
-        $flac_file = sprintf('%s/%s.flac', $pathinfo['dirname'], $pathinfo['filename']);
+        if(empty($converted_file))
+            $flac_file = sprintf('%s/%s.flac', $pathinfo['dirname'], $pathinfo['filename']);
+        else
+            $flac_file = $converted_file;
+
         if(file_exists($flac_file))
             return $flac_file;
 
@@ -66,8 +71,6 @@ class AudioConvert
         if(file_exists($tmp_file))
             unlink($tmp_file);
         self::convert_to_wav($file, $tmp_file);
-
-
 
         $process_flac = new Process(['flac', '-s', '-o', $flac_file, $tmp_file]);
         $process_flac->run();
