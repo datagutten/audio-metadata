@@ -16,6 +16,7 @@ matrix:
 before_install:
  - sudo apt-get -y install flac
  - sudo apt-get -y install atomicparsley
+ - sudo apt-get -y install ffmpeg
 
 install:
   - if [ "$IGNORE_PLATFORM_REQS" == 'true' ]; then composer install --no-interaction --ignore-platform-reqs;
