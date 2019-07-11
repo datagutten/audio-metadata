@@ -5,14 +5,17 @@ class AudioMetadata
 {
 	public $fields=array('title','artist','album','tracknumber','totaltracks','compilation'); //albumartist
     /**
-     * Check if metaflac and AtomicParsley are installed
+     * Check if metaflac and/or AtomicParsley are installed
+     * @param string $extension Specify extension check if the tool for that file type is installed
      * @throws DependencyFailedException
      */
-	public static function check_dependencies()
+	public static function check_dependencies($extension = null)
     {
         $dependcheck = new dependcheck;
-        $dependcheck->depend('metaflac');
-        $dependcheck->depend('AtomicParsley');
+        if(empty($extension) || $extension==='flac')
+            $dependcheck->depend('metaflac');
+        if(empty($extension) || $extension==='m4a' || $extension==='mp4')
+            $dependcheck->depend('AtomicParsley');
     }
 	
     /**
