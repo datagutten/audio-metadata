@@ -2,10 +2,11 @@
 
 namespace datagutten\AudioMetadata\tests\AudioMetadata;
 
-use AudioMetadata;
+use datagutten\AudioMetadata\AudioMetadata;
 use DependencyFailedException;
 use Exception;
 use FileNotFoundException;
+use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 
@@ -122,12 +123,12 @@ abstract class MetadataTestAbstract extends TestCase
     function testWriteInvalidExtension()
     {
         $this->output_file .= '.wav';
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         AudioMetadata::write_metadata($this->output_file, '', $this->info);
     }
     function testInvalidNewFile()
     {
-        $this->expectException(\Exception::class);
+        $this->expectException(Exception::class);
         AudioMetadata::write_metadata($this->valid_file, '/foo/bar', $this->info);
     }
     public function testArtwork()

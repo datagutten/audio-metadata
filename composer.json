@@ -2,6 +2,7 @@
   "name": "datagutten/audio-metadata",
   "description": "Tools for working with metadata in audio files",
   "license": "GPL-3.0-or-later",
+  "type": "library",
   "require": {
     "php": ">=7.1",
     "datagutten/tools": "^1.1",
@@ -11,11 +12,8 @@
     "phpunit/phpunit": ">=5.6"
   },
   "autoload": {
-    "classmap": [
-      "AudioMetadata.php",
-      "AudioConvert.php"
-    ],
     "psr-4": {
+      "datagutten\\AudioMetadata\\": "src",
       "datagutten\\AudioMetadata\\tests\\": "tests"
     }
   }

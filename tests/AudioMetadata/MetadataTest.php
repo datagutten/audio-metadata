@@ -2,7 +2,7 @@
 
 namespace datagutten\AudioMetadata\tests\AudioMetadata;
 
-use AudioMetadata;
+use datagutten\AudioMetadata\AudioMetadata;
 use Exception;
 use FileNotFoundException;
 use InvalidArgumentException;

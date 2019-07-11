@@ -4,7 +4,7 @@
 namespace datagutten\AudioMetadata\tests\AudioConvert;
 
 
-use AudioConvert;
+use datagutten\AudioMetadata\AudioConvert;
 use DependencyFailedException;
 use FileNotFoundException;
 use PHPUnit\Framework\TestCase;

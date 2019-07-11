@@ -1,5 +1,12 @@
 <?Php
 
+namespace datagutten\AudioMetadata;
+
+use dependcheck;
+use DependencyFailedException;
+use Exception;
+use FileNotFoundException;
+use InvalidArgumentException;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
 
