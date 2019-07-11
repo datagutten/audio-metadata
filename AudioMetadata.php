@@ -73,7 +73,7 @@ class AudioMetadata
 	{
 		if(!file_exists($infile) || !is_file($infile))
 		{
-			throw new InvalidArgumentException("$infile does not exist or is not a file");
+			throw new FileNotFoundException($infile);
 		}
 		$extension=pathinfo($infile,PATHINFO_EXTENSION);
 		$filename=self::build_file_name($trackinfo,$extension);
