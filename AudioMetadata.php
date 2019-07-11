@@ -200,7 +200,7 @@ class AudioMetadata
 		if(isset($trackinfo['tracknumber']) && isset($trackinfo['totaltracks'])) {
             $arguments[] = sprintf('--tracknum=%d/%d', $trackinfo['tracknumber'], $trackinfo['totaltracks']);
         }
-		else
+		elseif(isset($trackinfo['tracknumber']))
 		    $arguments[] = sprintf('--tracknum=%d', $trackinfo['tracknumber']);
 
 		foreach($options as $option_key=>$option_value)
