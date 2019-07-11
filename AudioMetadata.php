@@ -103,12 +103,7 @@ class AudioMetadata
                 printf("Renamed %s to %s\n", $infile, $output_file);
         }
 
-		if($extension=='flac')
-			return self::metaflac($infile,$output_file,$trackinfo,$artwork_file);
-		elseif($extension=='m4a' || $extension=='mp4')
-			return self::atomicparsley($infile,$output_file,$trackinfo,$artwork_file);
-		else
-			throw new InvalidArgumentException("Unsupported file extension: $extension");
+		return self::write_metadata($infile, $output_file, $trackinfo, $artwork_file);
 	}
 
     /**
@@ -124,8 +119,6 @@ class AudioMetadata
 	{
 	    if(!file_exists($infile))
 	        throw new FileNotFoundException($infile);
-		if(substr($infile,-4,4)!='flac')
-			throw new InvalidArgumentException('File must have flac extension');
 
 		copy($infile,$outfile);
 		$options=array(
@@ -237,6 +230,17 @@ class AudioMetadata
 
         return $outfile;
 	}
+
+	public static function write_metadata($infile, $outfile, $metadata, $artwork = null)
+    {
+        $extension = pathinfo($infile, PATHINFO_EXTENSION);
+        if($extension==='flac')
+            return self::metaflac($infile, $outfile, $metadata, $artwork);
+        elseif ($extension==='m4a' || $extension==='mp4')
+            return self::atomicparsley($infile, $outfile, $metadata, $artwork);
+        else
+            throw new InvalidArgumentException(sprintf('Writing metadata to %s files is not supported', $extension));
+    }
 
     /**
      * Get metadata from a file
