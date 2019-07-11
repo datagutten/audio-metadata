@@ -1,13 +1,29 @@
 <?php
 
+namespace datagutten\AudioMetadata\tests;
 use PHPUnit\Framework\TestCase;
+use AudioMetadata;
+use FileNotFoundException;
+use InvalidArgumentException;
+use Exception;
 
 /**
  * @codeCoverageIgnore
  */
 class MetadataTest extends TestCase
 {
-    public $info = array('artist'=>'No. 4', 'title'=>'Det finnes bare vi', 'track'=>'9', 'album'=>'Hva na', 'albumartist'=>'No. 4');
+    protected $valid_file;
+    protected $info = array('artist'=>'No. 4', 'title'=>'Det finnes bare vi', 'tracknumber'=>'9', 'album'=>'Hva na', 'albumartist'=>'No. 4');
+    protected $supported_extensions = array('flac', 'm4a');
+    protected $output_file = 'output.foo.bar';
+
+    public function setUp(): void
+    {
+        //$this->output_file = $this->test_files_dir.'/output.'.$this->extension;
+        if(file_exists($this->output_file))
+            unlink($this->output_file);
+    }
+
     public function testFileName()
     {
         $file = AudioMetadata::build_file_name($this->info);
@@ -25,10 +41,12 @@ class MetadataTest extends TestCase
         $this->assertEquals('No. 4 - Hva na', $folder);
     }
 
-    public function testFolderName()
+
+    public function writeMetadata($file, $extension, $compilation = null, $artwork = null)
     {
-        $file = AudioMetadata::build_file_name(array('artist'=>'No. 4', 'title'=>'Det finnes bare vi', 'track'=>'9'));
-        $this->assertEquals('09 Det finnes bare vi', $file);
+        $this->info['compilation'] = $compilation;
+        $file = AudioMetadata::write_metadata(__DIR__.'/'.$file.'.' . $extension, 'test_output.' . $extension, $this->info, $artwork);
+        $this->assertEquals('test_output.' . $extension, $file);
     }
 
     /**
@@ -40,29 +58,33 @@ class MetadataTest extends TestCase
         AudioMetadata::write_metadata(null, null, null, 'missing.jpg');
     }
 
-    public function testWriteMetadataFlac()
+    /*public function testTotalTracks()
     {
-        $dependcheck = new dependcheck();
-        try {
-            $dependcheck->depend('metaflac');
-        }
-        catch (DependencyFailedException $e)
+        $extensions = array('flac', 'm4a');
+        foreach ($extensions as $extension)
         {
-            $this->markTestSkipped('metaflac is not installed');
+            $this->info['totaltracks'] = 20;
+            printf("Total tracks: %s\n", $extension);
+            $this->writeMetadata('test', $extension, false);
         }
-        try {
-            AudioMetadata::metaflac(__DIR__ . '/test.flac', 'metadata.flac', $this->info);
-        }
-        catch (FileNotFoundException $e)
-        {
-            $this->markTestSkipped('test.flac missing');
-        }
-        $info = AudioMetadata::read_metadata('metadata.flac');
-        $this->assertIsArray($info);
-        $this->assertEquals($info['TITLE'], $this->info['title']);
-        $this->assertEquals($info['ARTIST'], $this->info['artist']);
-        $this->assertEquals($info['ALBUM'], $this->info['album']);
-        unlink('metadata.flac');
+    }*/
+    public function testRenameMissingFile()
+    {
+        $this->expectException(FileNotFoundException::class);
+        AudioMetadata::metadata('missing.flac', null, null);
+    }
+
+    public function testWriteUnsupportedExtension()
+    {
+        $this->expectException(InvalidArgumentException::class);
+        AudioMetadata::write_metadata('invalid.wav', '', array());
+    }
+    public function testReadUnsupportedExtension()
+    {
+        touch('invalid.wav');
+        $this->expectException(InvalidArgumentException::class);
+        AudioMetadata::read_metadata('invalid.wav');
+        unlink('invalid.wav');
     }
 
 }
