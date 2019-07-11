@@ -5,6 +5,9 @@ namespace datagutten\AudioMetadata\tests;
 use AudioMetadata;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * @codeCoverageIgnore
+ */
 class FileNameTest extends TestCase
 {
     public function testTitleWithTrack()

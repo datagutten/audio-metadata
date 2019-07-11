@@ -4,6 +4,9 @@ namespace datagutten\AudioMetadata\tests;
 use PHPUnit\Framework\TestCase;
 use AudioMetadata;
 
+/**
+ * @codeCoverageIgnore
+ */
 class DirectoryNameTest extends TestCase
 {
     function testAlbumWithArtist()

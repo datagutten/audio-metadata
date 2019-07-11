@@ -4,6 +4,9 @@ use AudioMetadata;
 use FileNotFoundException;
 use InvalidArgumentException;
 
+/**
+ * @codeCoverageIgnore
+ */
 class MetadataM4ATest extends MetadataTestAbstract
 {
     public $extension = 'm4a';
