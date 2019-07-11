@@ -66,11 +66,10 @@ class AudioMetadata
      * @param $infile
      * @param $outpath
      * @param $trackinfo
-     * @param bool $silent Do not show user output
      * @return string Renamed file
      * @throws Exception
      */
-	public static function metadata($infile,$outpath,$trackinfo, $silent = false)
+	public static function metadata($infile,$outpath,$trackinfo)
 	{
 		if(!file_exists($infile) || !is_file($infile))
 		{
@@ -95,16 +94,7 @@ class AudioMetadata
 		}
 
 		if(file_exists($output_file))
-		{
-		    if(!$silent)
-			    echo "$output_file exists\n";
 			return $output_file;
-		}
-		else
-        {
-            if(!$silent)
-                printf("Renamed %s to %s\n", $infile, $output_file);
-        }
 
 		return self::write_metadata($infile, $output_file, $trackinfo, $artwork_file);
 	}
