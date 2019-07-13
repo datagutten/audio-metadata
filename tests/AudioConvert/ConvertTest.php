@@ -79,6 +79,17 @@ class convertTest extends TestCase
         $this->assertFileExists($file);
         unlink($file);
     }
+
+    public function testConvertToFlacTempFile()
+    {
+        $tmp_file = sys_get_temp_dir() . '/test.m4a.wav';
+        touch($tmp_file);
+        $file = AudioConvert::convert_to_flac($this->sample_dir.'/test.m4a', $this->output_dir.'/converted.flac');
+        $this->assertFileNotExists($tmp_file);
+        $this->assertFileExists($file);
+        unlink($file);
+    }
+
     public function testConvertToExistingWav()
     {
         AudioConvert::convert_to_wav($this->sample_dir.'/test.m4a', $this->output_dir.'/converted.wav');
