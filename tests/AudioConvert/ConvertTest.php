@@ -37,6 +37,7 @@ class convertTest extends TestCase
 
     /**
      * @throws FileNotFoundException
+     * @requires PHPUnit >=8
      */
     public function testConvertFlacToWav()
     {
@@ -63,6 +64,7 @@ class convertTest extends TestCase
 
     /**
      * @throws FileNotFoundException
+     * @requires PHPUnit >=8
      */
     public function testConvertM4AToFlac()
     {
