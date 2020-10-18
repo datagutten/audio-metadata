@@ -15,7 +15,6 @@ matrix:
         - composer install --no-interaction
         - composer update --prefer-lowest
   allow_failures:
-    - php: '7.4snapshot'
     - php: 'nightly'
 
 before_install:
