@@ -22,11 +22,20 @@ abstract class MetadataTestAbstract extends TestCase
     public $output_file;
     protected $sample_dir;
     protected $info = array('artist'=>'No. 4', 'title'=>'Det finnes bare vi', 'tracknumber'=>'9', 'album'=>'Hva na', 'albumartist'=>'No. 4');
+
+    /**
+     * MetadataTestAbstract constructor.
+     * @param null $name
+     * @param array $data
+     * @param string $dataName
+     * @throws DependencyFailedException
+     */
     public function __construct($name = null, array $data = [], $dataName = '')
     {
         parent::__construct($name, $data, $dataName);
         $this->sample_dir = __DIR__.'/../sample_data';
         $this->valid_file = $this->sample_dir.'/test.'.$this->extension;
+        AudioMetadata::check_dependencies($this->extension);
     }
 
     public function setUp(): void
