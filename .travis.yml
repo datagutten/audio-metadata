@@ -7,9 +7,8 @@ matrix:
     - php: '7.2'
     - php: '7.3'
     - php: '7.4'
+    - php: '8.0'
     - php: 'nightly'
-      install:
-        - composer install --no-interaction --ignore-platform-reqs
     - php: '7.4'
       name: 'Prefer lowest'
       install:
@@ -18,10 +17,20 @@ matrix:
   allow_failures:
     - php: 'nightly'
 
-before_install:
- - sudo apt-get -y install flac
- - sudo apt-get -y install atomicparsley
- - sudo apt-get -y install ffmpeg
+addons:
+  apt:
+    packages:
+      - flac
+      - atomicparsley
+      - ffmpeg
+
+env:
+  global:
+    - XDEBUG_MODE=coverage
+
+cache:
+  directories:
+    - $HOME/.cache/composer/files
 
 install:
   composer install --no-interaction
