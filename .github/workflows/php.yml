@@ -1,0 +1,79 @@
+name: PHP Composer
+
+on:
+  push:
+    branches: '*'
+  pull_request:
+    branches: '*'
+
+jobs:
+  version:
+    name: 'PHP version test'
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        php: [ '7.4', '8.0', '8.1', '8.2' ]
+        os: [ ubuntu-latest, windows-latest ]
+        dependencies: [ lowest, highest ]
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup PHP with Xdebug
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: xdebug
+          extensions: curl
+
+      - name: Cache Composer packages
+        id: composer-cache
+        uses: actions/cache@v3
+        with:
+          path: vendor
+          key: ${{ runner.os }}-php${{ matrix.php }}-composer-${{ matrix.dependencies }}-${{ hashFiles('**/composer.json') }}
+          restore-keys: |
+            ${{ runner.os }}-php${{ matrix.php }}-composer-${{ matrix.dependencies }}-
+
+      - name: Install lowest dependencies with composer
+        if: matrix.dependencies == 'lowest'
+        run: composer update --no-ansi --no-interaction --no-progress --prefer-lowest
+
+      - name: Install highest dependencies with composer
+        if: matrix.dependencies == 'highest'
+        run: composer update --no-ansi --no-interaction --no-progress
+
+      - name: Cache sample data
+        id: sample-cache
+        uses: actions/cache@v3
+        with:
+          path: tests/sample_data
+          enableCrossOsArchive: true
+          key: sample
+
+      - name: Download sample data
+        run: |
+          mkdir tests/sample_data
+          wget -nc -O tests/sample_data/test.flac http://techslides.com/demos/samples/sample.flac
+          wget -nc -O tests/sample_data/test.m4a http://techslides.com/demos/samples/sample.m4a
+          wget -nc -O tests/sample_data/test.wav http://techslides.com/demos/samples/sample.wav
+          wget -nc -O tests/sample_data/artwork.jpg http://techslides.com/demos/samples/sample.jpg
+          wget -nc -O tests/sample_data/invalid.jpg http://techslides.com/demos/samples/sample.txt
+
+      - name: Install APT packages
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install flac atomicparsley ffmpeg
+
+      - name: Install Choco packages
+        if: matrix.os == 'windows-latest'
+        run: choco install ffmpeg atomicparsley flac --no-progress
+
+      - name: Run tests
+        run: vendor/bin/phpunit
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
