@@ -87,7 +87,7 @@ class convertTest extends TestCase
         $tmp_file = sys_get_temp_dir() . '/test.m4a.wav';
         touch($tmp_file);
         $file = AudioConvert::convert_to_flac($this->sample_dir.'/test.m4a', $this->output_dir.'/converted.flac');
-        $this->assertFileNotExists($tmp_file);
+        $this->assertFileDoesNotExist($tmp_file);
         $this->assertFileExists($file);
         unlink($file);
     }
