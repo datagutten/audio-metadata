@@ -55,7 +55,7 @@ jobs:
 
       - name: Download sample data
         run: |
-          mkdir tests/sample_data
+          mkdir -p tests/sample_data
           wget -nc -O tests/sample_data/test.flac http://techslides.com/demos/samples/sample.flac
           wget -nc -O tests/sample_data/test.m4a http://techslides.com/demos/samples/sample.m4a
           wget -nc -O tests/sample_data/test.wav http://techslides.com/demos/samples/sample.wav
