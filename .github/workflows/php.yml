@@ -54,6 +54,7 @@ jobs:
           key: sample
 
       - name: Download sample data
+        continue-on-error: true
         run: |
           mkdir -p tests/sample_data
           wget -nc -O tests/sample_data/test.flac http://techslides.com/demos/samples/sample.flac
