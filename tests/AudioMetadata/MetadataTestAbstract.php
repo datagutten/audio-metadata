@@ -163,6 +163,17 @@ abstract class MetadataTestAbstract extends TestCase
         //$this->assertEquals(2, $metadata['DISCNUMBER']);
     }
 
+    public function testMultipleArtists()
+    {
+        if (!str_contains(get_called_class(), 'MetadataFLACTest'))
+            $this->markTestSkipped('Multiple artists are only supported for FLAC');
+        $info = $this->info;
+        $info['artist'] = ['Artist 1', 'Artist 2'];
+        AudioMetadata::write_metadata($this->valid_file, $this->output_file, $info);
+        $read = AudioMetadata::read_metadata($this->output_file);
+        $this->assertEquals($read['ARTIST'], $info['artist']);
+    }
+
     public function tearDown(): void
     {
         if(file_exists($this->output_file))

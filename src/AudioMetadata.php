@@ -161,7 +161,15 @@ class AudioMetadata
 		{
 			if(!isset($trackinfo[$field_name]))
 			    continue;
-            $arguments[] = sprintf('--set-tag=%s=%s', $command_key, $trackinfo[$field_name]);
+            if (is_array($trackinfo[$field_name]))
+            {
+                foreach ($trackinfo[$field_name] as $value)
+                {
+                    $arguments[] = sprintf('--set-tag=%s=%s', $command_key, $value);
+                }
+            }
+            else
+                $arguments[] = sprintf('--set-tag=%s=%s', $command_key, $trackinfo[$field_name]);
 		}
 		$arguments[] = $outfile;
 
@@ -207,6 +215,7 @@ class AudioMetadata
 			elseif($trackinfo['compilation']===false)
 				$trackinfo['compilation']='false';
 		}
+        //TODO: Handle array values
 		$options=array('artist'=>		'--artist=',
 						'title'=>		'--title=',
 						'album'=>		'--album=',
@@ -282,7 +291,16 @@ class AudioMetadata
             $metadata_raw = $process->getOutput();
             preg_match_all('/comment\[[0-9]+\]\: ([A-Z\_]+)=(.+)/', $metadata_raw, $metadata_raw2);
             $metadata_raw2[2] = array_map('trim', $metadata_raw2[2]);
-            $metadata = array_combine($metadata_raw2[1], $metadata_raw2[2]);
+            $metadata = [];
+            $count = array_count_values($metadata_raw2[1]);
+            foreach ($metadata_raw2[2] as $key => $value)
+            {
+                $field = $metadata_raw2[1][$key];
+                if ($count[$field] > 1)
+                    $metadata[$field][] = $value;
+                else
+                    $metadata[$field] = $value;
+            }
             return $metadata;
         }
         else
