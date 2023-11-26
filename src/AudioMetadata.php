@@ -2,6 +2,7 @@
 
 namespace datagutten\AudioMetadata;
 
+use datagutten\tools\files\files;
 use dependcheck;
 use DependencyFailedException;
 use Exception;
@@ -97,7 +98,7 @@ class AudioMetadata
 		else
 		{
 			$artwork_extension=pathinfo($trackinfo['cover'],PATHINFO_EXTENSION);
-			$artwork_file=$album_dir.'/'.$trackinfo['album'].'.'.$artwork_extension;
+            $artwork_file = files::path_join($album_dir, filnavn($trackinfo['album']) . '.' . $artwork_extension);
 			if(!file_exists($artwork_file))
 				copy($trackinfo['cover'],$artwork_file);
 		}
